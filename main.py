@@ -55,7 +55,6 @@ class urlShorteneren:
         if url not in self.data:
             if validators.url(url):
                 url=remove_scheme(url)
-
                 hashed=hashlib.shake_256(url.encode()).hexdigest(5)
                 self._add(url, hashed)
                 i_d=str(uuid.uuid5(uuid.NAMESPACE_URL, url))
@@ -111,6 +110,8 @@ def create():
             return redirect(url_for("index"))
         else:
             hashed=urlShortener.create(url, version=int(version), data=data)
+            if hashed is False:
+                return redirect(url_for("index"))
             return redirect(url_for("show", url=hashed))
     else:
         return redirect(url_for("index"))
