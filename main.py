@@ -7,6 +7,19 @@ import threading
 from flask import Flask, request, render_template, redirect, url_for , session
 import validators
 
+######settings######
+host="0.0.0.0"
+port=8080
+debug=False
+
+json_save_time=150
+json_file="data.json"
+
+default_scheme="https://"
+
+hash_length=5 # half the length ie 5 will give a lengt of 10
+####################
+
 def remove_scheme(url):
     parsed_url = urlsplit(url)
     return urlunsplit(("", parsed_url.netloc, parsed_url.path, parsed_url.query, parsed_url.fragment))
@@ -29,7 +42,7 @@ class urlShorteneren:
                 json_object = json.dumps(self.data, indent=4)
                 f.write(json_object)
                 print("Saved")
-            time.sleep(150)
+            time.sleep(json_save_time)
             
     def _add(self, url, shortened, version=1):
         if url not in self.data:
@@ -55,7 +68,7 @@ class urlShorteneren:
         if url not in self.data:
             if validators.url(url):
                 url=remove_scheme(url)
-                hashed=hashlib.shake_256(url.encode()).hexdigest(5)
+                hashed=hashlib.shake_256(url.encode()).hexdigest(hash_length)
                 self._add(url, hashed)
                 i_d=str(uuid.uuid5(uuid.NAMESPACE_URL, url))
                 self._add(url, i_d, version=3)
@@ -90,7 +103,7 @@ class urlShorteneren:
                     return url
         return False
 
-urlShortener=urlShorteneren("data.json")
+urlShortener=urlShorteneren(json_file)
 
 app = Flask(__name__)
 
@@ -130,11 +143,11 @@ def show(url):
 @app.route('/<string:url>', methods=['GET'])
 def redirect_url(url):
     found=str(urlShortener.find_url(url))
-    found="https://"+found
+    found=default_scheme+found
     if found:
         return render_template("redirect.html", url=found)
     else:
         return redirect(url_for("index"))
     
 if __name__ == '__main__':
-    app.run(host='0.0.0.0',port=8080, debug=False)
+    app.run(host=host,port=port, debug=debug)
