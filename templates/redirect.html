@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .progress {
+            transition: width 10s linear;
+            width: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 max-w-md">
+                <h2 class="text-2xl font-bold mb-4">Redirecting...</h2>
+                <div class="mb-4">
+                    <div class="relative pt-1">
+                        <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
+                            <div id="progress" class="progress w-0 h-2 rounded bg-blue-500"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center">
+                    <button id="skip-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                        Skip Wait
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const redirectToUrl = (url) => {
+            window.location.href = url;
+        }
+
+        const url = "{{ url }}";
+        const progress = document.getElementById('progress');
+        const skipButton = document.getElementById('skip-btn');
+
+        skipButton.addEventListener('click', () => {
+            redirectToUrl(url);
+        });
+
+        setTimeout(() => {
+            progress.style.width = '100%';
+        }, 0);
+
+        setTimeout(() => {
+            redirectToUrl(url);
+        }, 10000);
+    </script>
+</body>
+</html>
