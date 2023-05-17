@@ -50,7 +50,7 @@ def before_request_callback():
     if not check_login():
         path = request.path
         if path not in open_list:
-            flash("Session is over")
+            flash("Session is over","warning")
             return redirect(url_for('auth.login'))
         else:
             session["access"] = "False"
@@ -73,12 +73,13 @@ def loginPOST():
         if password == user["password"]:
             session["user"] = {"name": name, "time": now.strftime("%d%H%M"), "power": user["power"]}
             session["access"] = "True"
+            flash("logged in","success")
             return redirect(url_for('index'))
         else:
-            flash("wrong username/password")
+            flash("wrong username/password","error")
             return redirect(url_for('auth.login'))
     else:
-        flash("wrong username/password")
+        flash("wrong username/password","error")
         return redirect(url_for('auth.login'))
 
     
@@ -97,15 +98,17 @@ def signupPOST():
         users.append({"name": name, "password": hashlib.sha256(data["password"].encode("utf-8")).hexdigest(), "power": 1})
         save_db(users)
         session["access"] = "True"
+        flash("Signed up","success")
         return redirect(url_for('index'))
     else:
-        flash("Username in use")
+        flash("Username in use", "error")
         return redirect(url_for('auth.signup'))
 
 @app.route("/signout")
 def signout():
     session["user"] = ""
     session["access"] = "False"
+    flash("Signed out","success")
     return redirect("/")
 
 @app.route("/change_password", methods=["POST"])
@@ -123,16 +126,17 @@ def change_password():
                     users[i] = user
                     break
             save_db(users)
-            flash("password changed")
+            flash("password changed","warning")
         else:
-            flash("old password entered is incorrectly entered")
+            flash("old password entered is incorrectly entered","error")
     else:
-        flash("previous password is wrong")
+        flash("previous password is wrong","error")
     return redirect(url_for('auth.profile'))
 
 @app.route("/wipedb", methods=["GET"])
 def wipe():
     x=find_user(session["user"]["name"])
-    if x["session"] == "2":
-        save_db([])
+    if x != None:
+        if x["session"] == "2":
+            save_db([])
     return redirect("/")
