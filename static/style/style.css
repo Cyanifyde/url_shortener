@@ -1,0 +1,22 @@
+.success {
+    background-color: green;
+}
+
+.warning {
+    background-color: orange;
+}
+
+.error {
+    background-color: red;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+ul.list-none li {
+    animation-name: fadeOut;
+    animation-duration: 1s;
+    animation-fill-mode: forwards; 
+}
+ul.list-none li{ animation-delay: 3s; }
