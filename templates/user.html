@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel='stylesheet'>
+    <style>
+        @keyframes slideInFromLeft {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+        .card {
+            animation: 1s ease-out 0s 1 slideInFromLeft;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-3 gap-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul class="list-none">
+                <div class="card w-full max-w-sm m-4 bg-white rounded overflow-hidden shadow-md">
+                    <div class="px-6 py-4">
+                        {% for category, message in messages %}
+                    <li class="{{ category }} text-white px-4 py-2 mb-2">
+                        {{ message }}
+                    </li>
+                    {% endfor %}
+                    </div>
+                </div>
+            </ul>
+            {% endif %}
+            {% endwith %}
+            {% for url_data in urls %}
+            <div class="card w-full max-w-sm m-4 bg-white rounded overflow-hidden shadow-md">
+                <div class="px-6 py-4">
+                    <div class="font-bold text-xl mb-2">https:{{ url_data.url }}</div>
+                    <p>Hash: {{ url_data.hash }}</p>
+                    <p>UUID: {{ url_data.uuid }}</p>
+                    <p>Custom: {{ url_data.custom }}</p>
+                    <div class="flex justify-between">
+                        <a href="/show/{{ url_data.hash }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Follow
+                        </a>
+                        <a href="/delete/{{ url_data.hash }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
