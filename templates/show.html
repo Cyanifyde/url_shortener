@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shortened URL</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel='stylesheet'>
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="container mx-auto px-4">
@@ -18,7 +19,7 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Shortened URL:</label>
-                    <p class="text-blue-500" id="shortened-url">https://example.com/{{ url }}</p>
+                    <p class="text-blue-500" id="shortened-url">{{ url_for('index')}}{{ url }}</p>
                 </div>
                 <div class="flex items-center justify-between">
                     <button id="copy-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
