@@ -1,12 +1,14 @@
 import json
 import hashlib
 import time
-from urllib.parse import urlsplit, urlunsplit, quote
+from werkzeug.serving import run_simple
 import uuid
 import threading
-from flask import Flask, request, render_template, redirect, url_for , session
-import validators
 import os
+from urllib.parse import urlsplit, urlunsplit, quote
+from flask import Flask, request, render_template, redirect, url_for , session,flash
+import validators
+
 app = Flask(__name__)
 
 ######settings######
@@ -24,11 +26,13 @@ hash_length=5 # half the length ie 5 will give a length of 10
 app.secret_key = "euwhfewf"
 
 cache_timeout= 5*60
-
 ####################
+
+
 def check_session():
     try:
         x=session["access"]
+
     except KeyError:
         session["access"]="False"
 
@@ -54,8 +58,8 @@ class urlShorteneren:
             with open(self.file,"w",encoding="UTF-8") as f:
                 json_object = json.dumps(self.data, indent=4)
                 f.write(json_object)
-            self._check_and_remove_users()
-            self._cut_cache()
+            #self._check_and_remove_users()
+            #self._cut_cache()
             time.sleep(json_save_time)
 
     def _cut_cache(self, max= 10):
@@ -66,6 +70,11 @@ class urlShorteneren:
             x=list(self.cache.keys())[len(self.cache)-max:]
             for i in x:
                 del self.cache[i]
+
+    def _remove_from_cache(self, user):
+        if user in self.cache:
+            del self.cache[user]
+
         
     def _add(self, url, shortened, version=1):
         if url not in self.data:
@@ -101,9 +110,11 @@ class urlShorteneren:
             for user in self.data[url]["userList"]:
                 if user["user_id"]["name"] == user_id:
                     self.data[url]["userList"].remove(user)
+                    
 
     
     def find_urls_by_user(self, user_id, cache=True, save_to_cache=True):
+
         if cache:
             if user_id in self.cache:
                 return self.cache[user_id]["urls"]
@@ -114,7 +125,7 @@ class urlShorteneren:
                     urls.append({"hash": data["hash"], "url": url,"uuid":data["uuid"],"custom":data["custom"]})
         if save_to_cache:
             self.cache[user_id]={"urls":urls,"time":time.time()}
-
+            
         return urls
     
     def _check_and_remove_users(self):
@@ -172,9 +183,11 @@ urlShortener=urlShorteneren(json_file)
 def index():
     check_session()
     try:
-        return render_template("index.html",access=session["access"])
+        x=session["access"]
     except KeyError:
         return render_template("index.html",access="False")
+        
+    return render_template("index.html",access=session["access"])
 
 @app.route('/create', methods=['POST','GET'])
 def create():
@@ -221,8 +234,13 @@ def user():
         if session["access"]:
 
             user_urls = urlShortener.find_urls_by_user(session["user"]["name"])
-            return render_template("user.html", user=session["user"], urls=user_urls)
+            if user_urls != []:
+                return render_template("user.html", user=session["user"], urls=user_urls)
+            else:
+                flash("You have no urls","warning")
+                return redirect(url_for("index"))
         else:
+            
             return redirect(url_for("index"))
     except KeyError:
         return redirect(url_for("index"))
@@ -238,6 +256,7 @@ def delete(url):
     except KeyError:
         return redirect(url_for("index"))
     
+
 @app.route('/<string:url>', methods=['GET'])
 def redirect_url(url):
     found=str(urlShortener.find_url(url))
@@ -250,4 +269,4 @@ def redirect_url(url):
 from auth.auth import app as auth
 app.register_blueprint(auth)
 if __name__ == '__main__':
-    app.run(host=host,port=port, debug=debug)
+    run_simple('localhost', 8080, app, use_reloader=False,reloader_interval=1, threaded=False, processes=15)
